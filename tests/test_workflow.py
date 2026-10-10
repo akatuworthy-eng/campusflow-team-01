@@ -53,11 +53,27 @@ class WorkflowTestCase(unittest.TestCase):
         reopened = reopen_ticket(self.tickets, "T001")
         self.assertEqual(reopened["status"], "open")
 
+    def test_only_resolved_ticket_can_be_reopened(self):
+        with self.assertRaises(ValueError):
+            reopen_ticket(self.tickets, "T001")
+        self.assertEqual(self.tickets[0]["status"], "open")
+
     def test_queue_sorts_by_priority_then_numeric_id(self):
         create_ticket(self.tickets, "Medium issue", "Software", "low", 3)
         create_ticket(self.tickets, "Another critical", "Network", "high", 10)
         queue = get_work_queue(self.tickets)
         self.assertEqual([ticket["id"] for ticket in queue], ["T001", "T004", "T003", "T002"])
+
+    def test_queue_uses_numeric_ticket_id_for_priority_ties(self):
+        tickets = []
+        for number in range(1, 11):
+            create_ticket(tickets, f"Issue {number}", "Other", "low", 1)
+
+        queue = get_work_queue(tickets)
+        self.assertLess(
+            [ticket["id"] for ticket in queue].index("T002"),
+            [ticket["id"] for ticket in queue].index("T010"),
+        )
 
     def test_queue_excludes_resolved_tickets(self):
         assign_ticket(self.tickets, "T001", "Ada Lovelace")
