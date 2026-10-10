@@ -22,6 +22,8 @@ def _find_ticket(tickets, ticket_id):
 def assign_ticket(tickets, ticket_id, staff_name):
     """Assign a ticket to a non-empty staff member name."""
     ticket = _find_ticket(tickets, ticket_id)
+    if ticket.get("status") == "resolved":
+        raise ValueError("Resolved tickets must be explicitly reopened before reassignment")
     if not isinstance(staff_name, str) or not staff_name.strip():
         raise ValueError("Staff name cannot be blank")
     ticket["assigned_to"] = staff_name.strip()
