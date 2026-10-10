@@ -53,6 +53,22 @@ class WorkflowTestCase(unittest.TestCase):
         reopened = reopen_ticket(self.tickets, "T001")
         self.assertEqual(reopened["status"], "open")
 
+    def test_resolved_ticket_reassignment_requires_reopen(self):
+        assign_ticket(self.tickets, "T001", "Ada Lovelace")
+        update_status(self.tickets, "T001", "in_progress")
+        update_status(self.tickets, "T001", "resolved")
+
+        with self.assertRaisesRegex(ValueError, "reopened"):
+            assign_ticket(self.tickets, "T001", "Grace Hopper")
+
+        self.assertEqual(self.tickets[0]["assigned_to"], "Ada Lovelace")
+        self.assertEqual(self.tickets[0]["status"], "resolved")
+
+        reopen_ticket(self.tickets, "T001")
+        reassigned = assign_ticket(self.tickets, "T001", "Grace Hopper")
+        self.assertEqual(reassigned["assigned_to"], "Grace Hopper")
+        self.assertEqual(reassigned["status"], "open")
+
     def test_only_resolved_ticket_can_be_reopened(self):
         with self.assertRaises(ValueError):
             reopen_ticket(self.tickets, "T001")
