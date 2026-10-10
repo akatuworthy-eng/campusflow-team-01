@@ -52,7 +52,8 @@ def run_cli(data_path=DATA_PATH):
         tickets = load_tickets(data_path)
     except ValueError as error:
         print(f"Could not load tickets: {error}")
-        tickets = []
+        print("Existing ticket data was not modified. Fix the file and restart.")
+        return 1
 
     while True:
         print("\nCampusFlow")
@@ -91,7 +92,7 @@ def run_cli(data_path=DATA_PATH):
             elif choice == "9":
                 save_tickets(tickets, data_path)
                 print("Tickets saved. Goodbye.")
-                return
+                return 0
             else:
                 print("Choose a number from 1 to 9.")
         except (ValueError, TypeError) as error:
@@ -99,4 +100,4 @@ def run_cli(data_path=DATA_PATH):
 
 
 if __name__ == "__main__":
-    run_cli()
+    raise SystemExit(run_cli())
