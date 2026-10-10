@@ -48,11 +48,39 @@ def create_ticket(tickets, title, category, urgency, affected_users):
     normalized_category = categories[category.strip().lower()]
     normalized_urgency = urgency.strip().lower()
 
-    # Generate a unique ID
-    next_number = max(
-        (int(ticket["id"][1:]) for ticket in tickets),
-        default=0
-    ) + 1
+    
+    # Validate existing IDs and find the highest number
+    existing_numbers = []
+    seen_ids = set()
+
+    for existing in tickets:
+        existing_id = (
+            existing.get("id")
+            if isinstance(existing, dict)
+            else None
+        )
+
+        if (
+            not isinstance(existing_id, str)
+            or len(existing_id) < 4
+            or not existing_id.startswith("T")
+            or not existing_id[1:].isdigit()
+        ):
+            raise ValueError("Invalid existing ticket ID")
+
+        number = int(existing_id[1:])
+
+        if number < 1 or existing_id != f"T{number:03d}":
+            raise ValueError("Invalid existing ticket ID")
+
+        if existing_id in seen_ids:
+            raise ValueError("Duplicate existing ticket ID")
+
+        seen_ids.add(existing_id)
+        existing_numbers.append(number)
+
+    next_number = max(existing_numbers, default=0) + 1
+
 
     ticket = {
         "id": f"T{next_number:03d}",
