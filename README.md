@@ -13,7 +13,9 @@ py main.py
 
 The CLI loads `data/tickets.json` when it starts. If that file does not exist,
 CampusFlow starts with no tickets. Saving creates the `data` directory when
-needed.
+needed. If the file contains malformed JSON or invalid ticket records, startup
+stops without changing the file. Correct or recover the stored data before
+starting again.
 
 ## Run tests
 
@@ -45,7 +47,7 @@ medium, or high. Priority is calculated in this exact order:
 
 The normal status workflow is `open -> in_progress -> resolved`. A ticket must
 be assigned before it starts work. Resolved tickets can only return to `open`
-through the explicit reopen action.
+through the explicit reopen action; they cannot be reassigned until reopened.
 
 The work queue contains open tickets, ordered by priority (critical through
 low) and then the numeric portion of the ticket ID.
