@@ -27,36 +27,36 @@ class TestPriority(unittest.TestCase):
             calculate_priority("high", 0)
 
 
-def test_priority_boundaries(self):
-    cases = [
-        ("high", 9, "high"),
-        ("high", 10, "critical"),
-        ("low", 10, "high"),
-        ("low", 3, "medium"),
-        ("medium", 1, "medium"),
-    ]
 
-    for urgency, users, expected in cases:
-        with self.subTest(urgency=urgency, users=users):
-            result = calculate_priority(urgency, users)
-            self.assertEqual(result, expected)
+    def test_priority_boundaries(self):
+        cases = [
+            ("high", 9, "high"),
+            ("high", 10, "critical"),
+            ("low", 10, "high"),
+            ("low", 3, "medium"),
+            ("medium", 1, "medium"),
+        ]
 
-
-def test_invalid_affected_user_values(self):
-    invalid_values = [0, -3, 1.5, "5", True, None]
-
-    for value in invalid_values:
-        with self.subTest(value=value):
-            with self.assertRaises(ValueError):
-                calculate_priority("low", value)
+        for urgency, users, expected in cases:
+            with self.subTest(urgency=urgency, users=users):
+                result = calculate_priority(urgency, users)
+                self.assertEqual(result, expected)
 
 
-def test_invalid_urgency_values(self):
-    for urgency in ["urgent", "", "extreme", None]:
-        with self.subTest(urgency=urgency):
-            with self.assertRaises(ValueError):
-                calculate_priority(urgency, 5)
+    def test_invalid_affected_user_values(self):
+        invalid_values = [0, -3, 1.5, "5", True, None]
 
+        for value in invalid_values:
+            with self.subTest(value=value):
+                with self.assertRaises(ValueError):
+                    calculate_priority("low", value)
+
+
+    def test_invalid_urgency_values(self):
+        for urgency in ["urgent", "", "extreme", None]:
+            with self.subTest(urgency=urgency):
+                with self.assertRaises(ValueError):
+                    calculate_priority(urgency, 5)
 
 
 class TestTicketCreation(unittest.TestCase):
@@ -110,43 +110,44 @@ class TestTicketCreation(unittest.TestCase):
         self.assertEqual(ticket["urgency"], "high")
 
 
-def test_invalid_creation_preserves_tickets(self):
-    create_ticket(
-        self.tickets, "Wi-Fi down", "Network", "high", 12
-    )
 
-    original = self.tickets.copy()
-
-    with self.assertRaises(ValueError):
+    def test_invalid_creation_preserves_tickets(self):
         create_ticket(
-            self.tickets, "Broken laptop", "Invalid", "low", 2
+            self.tickets, "Wi-Fi down", "Network", "high", 12
         )
 
-    self.assertEqual(self.tickets, original)
+        original = self.tickets.copy()
+
+        with self.assertRaises(ValueError):
+            create_ticket(
+                self.tickets, "Broken laptop", "Invalid", "low", 2
+            )
+
+        self.assertEqual(self.tickets, original)
 
 
-def test_continue_existing_id_sequence(self):
-    first = create_ticket(
-        self.tickets, "Wi-Fi down", "Network", "low", 1
-    )
-
-    # Simulate an existing ticket restored from storage
-    first["id"] = "T007"
-
-    second = create_ticket(
-        self.tickets, "Laptop broken", "Hardware", "high", 2
-    )
-
-    self.assertEqual(second["id"], "T008")
-
-
-def test_reject_malformed_existing_id(self):
-    self.tickets.append({"id": "X001"})
-
-    with self.assertRaises(ValueError):
-        create_ticket(
+    def test_continue_existing_id_sequence(self):
+        first = create_ticket(
             self.tickets, "Wi-Fi down", "Network", "low", 1
         )
+
+        # Simulate an existing ticket restored from storage
+        first["id"] = "T007"
+
+        second = create_ticket(
+            self.tickets, "Laptop broken", "Hardware", "high", 2
+        )
+
+        self.assertEqual(second["id"], "T008")
+
+
+    def test_reject_malformed_existing_id(self):
+        self.tickets.append({"id": "X001"})
+
+        with self.assertRaises(ValueError):
+            create_ticket(
+                self.tickets, "Wi-Fi down", "Network", "low", 1
+            )
 
 
 if __name__ == "__main__":
